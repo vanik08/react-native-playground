@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { 
   StyleSheet, 
   View, 
@@ -13,18 +14,24 @@ export default class App extends React.Component {
 
   state = {
     newTodo: '',
-    todos: ['1', '2'],
+    todos: ['example 1', 'example 2'],
   }
 
   onNewTodo = (newTodo) => this.setState({ newTodo });
 
   onAddNewTodo = () => {
-    this.setState((prevState) => {
-      return {
+    this.setState((prevState) => ({
         todos: [...prevState.todos, this.state.newTodo],
         newTodo: '',
-      };
-    });
+        focusInput: true,
+    }));
+    _.defer(this._input.focus);
+  }
+
+  onDelete = (searchItm) => {
+    this.setState((prevState) => ({
+      todos: _.pull(prevState.todos, searchItm),
+    }));
   }
 
   render() {
@@ -32,16 +39,20 @@ export default class App extends React.Component {
       <View style={styles.container}>
         <View style={styles.inputContainer}>
           <TextInput
+            ref={input => this._input = input }
             style={styles.input}
             placeholder="Add Todo Item"
             onChangeText={this.onNewTodo}
             onSubmitEditing={this.onAddNewTodo}
+            returnKeyType="done"
+            enablesReturnKeyAutomatically
             value={this.state.newTodo}
           />
           <View style={styles.addBtn}>
             <Button
               style={styles.addBtn}
               title="Add"
+              disabled={!this.state.newTodo}
               onPress={this.onAddNewTodo}
             />
           </View>
@@ -50,7 +61,16 @@ export default class App extends React.Component {
           <ListView 
             style={styles.list}
             dataSource={this.ds.cloneWithRows(this.state.todos)}
-            renderRow={(rowData) => <Text style={styles.listItem}>{rowData}</Text>}
+            renderRow={(rowData) => (
+              <View style={styles.listRow}>
+                <Text style={styles.listItem}>{rowData}</Text>
+                <Button
+                  title="Delete"
+                  color="red"
+                  onPress={() => this.onDelete(rowData)}
+                />
+              </View>
+            )}
           />
         </View>
       </View>
@@ -60,8 +80,8 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 50,
-    paddingBottom: 50,
+    paddingTop: 35,
+    paddingBottom: 35,
     paddingLeft: 10,
     paddingRight: 10,
   },
@@ -72,14 +92,24 @@ const styles = StyleSheet.create({
   },
   input: {
     flexGrow: 1,
-    height: 30,
+    height: 32,
     width: '50%',
     fontSize: 30,
   },
   addBtn: {
     marginRight: 0,
   },
+  list: {
+  },
+  listRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    borderBottomColor: '#AABBCC',
+    borderBottomWidth: 1,
+  },
   listItem: {
     fontSize: 25,
+    fontStyle: 'italic',
   }
 });
