@@ -15,6 +15,8 @@ export default class App extends React.Component {
   state = {
     newTodo: '',
     todos: ['example 1', 'example 2'],
+    doneTodos: { 'example 2': true, },
+    filterDone: false,
   }
 
   onNewTodo = (newTodo) => this.setState({ newTodo });
@@ -34,6 +36,17 @@ export default class App extends React.Component {
     }));
   }
 
+  onDone = (doneItm) => {
+    console.log(doneItm, 'DONE ITM');
+
+    this.setState(prevState => ({
+      doneTodos: {
+        ...this.state.doneTodos,
+        [doneItm]: !prevState.doneTodos[doneItm],
+      }
+    }));
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -48,26 +61,38 @@ export default class App extends React.Component {
             enablesReturnKeyAutomatically
             value={this.state.newTodo}
           />
-          <View style={styles.addBtn}>
+          <View style={styles.actionButton}>
             <Button
-              style={styles.addBtn}
+              style={styles.actionButton}
               title="Add"
               disabled={!this.state.newTodo}
               onPress={this.onAddNewTodo}
+            />
+          </View>
+          <View style={styles.actionButton}>
+            <Button
+              style={styles.actionButton}
+              title={this.state.filterDone ? 'Show All' : "Show Done"}
+              onPress={() => this.setState(prevState => ({ filterDone: !prevState.filterDone }))}
             />
           </View>
         </View>
         <View>
           <ListView 
             style={styles.list}
-            dataSource={this.ds.cloneWithRows(this.state.todos)}
+            dataSource={this.ds.cloneWithRows(this.state.filterDone ? this.state.todos.filter(itm => this.state.doneTodos[itm]) : this.state.todos)}
             renderRow={(rowData) => (
               <View style={styles.listRow}>
-                <Text style={styles.listItem}>{rowData}</Text>
+                <Text style={this.state.doneTodos[rowData] ? styles.listItemDone : styles.listItem}>{rowData}</Text>
                 <Button
                   title="Delete"
                   color="red"
                   onPress={() => this.onDelete(rowData)}
+                />
+                <Button
+                  title={this.state.doneTodos[rowData] ? 'Todo' : 'Done'}
+                  color={this.state.doneTodos[rowData] ? 'purple' : 'green'}
+                  onPress={() => this.onDone(rowData)}
                 />
               </View>
             )}
@@ -91,13 +116,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   input: {
-    flexGrow: 1,
     height: 32,
     width: '50%',
     fontSize: 30,
   },
-  addBtn: {
-    marginRight: 0,
+  actionButton: {
   },
   list: {
   },
@@ -107,6 +130,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderBottomColor: '#AABBCC',
     borderBottomWidth: 1,
+  },
+  listItemDone: {
+    fontSize: 24,
+    fontStyle: 'italic',
+    textDecorationLine: 'line-through',
   },
   listItem: {
     fontSize: 25,
