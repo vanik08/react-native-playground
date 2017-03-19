@@ -3,24 +3,33 @@ import { StyleSheet, Text, Button, Alert, View } from 'react-native';
 
 export default class App extends React.Component {
   state = {
-    show: false,
+    total: 0,
   }
 
-  alertMe = () => {
-    Alert.alert(
-      'Omg something is up!'
-    )
+  onAdd = () => {
+    this.setState((prevState) => {
+      return { total: prevState.total + 1};
+    })
+  }
+
+  onSubtract = () => {
+    if (this.state.total === 0) {
+      Alert.alert('Cannot go any lower than 0!');
+    } else {
+      this.setState((prevState) => {
+        return { total: prevState.total - 1};
+      });
+    }
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
-        <Button onPress={() => this.setState({ show: !this.state.show }) } title="Button!" />
-        <Button title="Alert Me!" onPress={this.alertMe} />
-        {this.state.show && <Text>SHOWING!!!</Text>}
+        <Text style={styles.text}>Total: {this.state.total} </Text>
+        <View style={styles.inlineView}>
+          <Button style={styles.opBtn} onPress={this.onAdd} title="ADD" />
+          <Button style={styles.opBtn} onPress={this.onSubtract} title="Subtract" />
+        </View>
       </View>
     );
   }
@@ -28,9 +37,22 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
+    padding: 25,
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
   },
+  text: {
+    fontSize: 60,
+  },
+  inlineView: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  opBtn: {
+    fontSize: 100,
+  }
 });
