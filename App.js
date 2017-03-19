@@ -1,34 +1,57 @@
 import React from 'react';
-import { StyleSheet, Text, Button, Alert, View } from 'react-native';
+import { 
+  StyleSheet, 
+  View, 
+  TextInput,
+  Button, 
+  ListView,
+  Text
+} from 'react-native';
 
 export default class App extends React.Component {
+  ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+
   state = {
-    total: 0,
+    newTodo: '',
+    todos: ['1', '2'],
   }
 
-  onAdd = () => {
+  onNewTodo = (newTodo) => this.setState({ newTodo });
+
+  onAddNewTodo = () => {
     this.setState((prevState) => {
-      return { total: prevState.total + 1};
-    })
-  }
-
-  onSubtract = () => {
-    if (this.state.total === 0) {
-      Alert.alert('Cannot go any lower than 0!');
-    } else {
-      this.setState((prevState) => {
-        return { total: prevState.total - 1};
-      });
-    }
+      return {
+        todos: [...prevState.todos, this.state.newTodo],
+        newTodo: '',
+      };
+    });
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.text}>Total: {this.state.total} </Text>
-        <View style={styles.inlineView}>
-          <Button style={styles.opBtn} onPress={this.onAdd} title="ADD" />
-          <Button style={styles.opBtn} onPress={this.onSubtract} title="Subtract" />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Add Todo Item"
+            onChangeText={this.onNewTodo}
+            onSubmitEditing={this.onAddNewTodo}
+            value={this.state.newTodo}
+          />
+          <View style={styles.addBtn}>
+            <Button
+              style={styles.addBtn}
+              title="Add"
+              onPress={this.onAddNewTodo}
+            />
+          </View>
+        </View>
+        <View>
+          <ListView 
+            style={styles.list}
+            dataSource={this.ds.cloneWithRows(this.state.todos)}
+            renderRow={(rowData) => <Text style={styles.listItem}>{rowData}</Text>}
+          />
         </View>
       </View>
     );
@@ -37,22 +60,26 @@ export default class App extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 25,
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
+    paddingTop: 50,
+    paddingBottom: 50,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
-  text: {
-    fontSize: 60,
-  },
-  inlineView: {
-    flex: 1,
-    width: '100%',
+  inputContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    backgroundColor: '#fff',
+    justifyContent: 'space-between',
   },
-  opBtn: {
-    fontSize: 100,
+  input: {
+    flexGrow: 1,
+    height: 30,
+    width: '50%',
+    fontSize: 30,
+  },
+  addBtn: {
+    marginRight: 0,
+  },
+  listItem: {
+    fontSize: 25,
   }
 });
